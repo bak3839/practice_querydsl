@@ -655,4 +655,44 @@ public class QuerydslBasicTest {
             return new BooleanBuilder();
         }
     }
+
+    @Test
+    void bulkUpdate() {
+        // member1 -> 비회원
+        // member2 -> 비회원
+        // 벌크성 쿼리는 디비로 바로 변경 내역을 반영해서 영속성 컨텍스트와 값이 일치하지 않음
+
+        long count = queryFactory
+            .update(member)
+            .set(member.username, "비회원")
+            .where(member.age.lt(28))
+            .execute();
+
+        em.flush();
+        em.clear();
+
+        List<Member> result = queryFactory
+            .selectFrom(member)
+            .fetch();
+
+        for (Member member : result) {
+            System.out.println("member = " + member);
+        }
+    }
+
+    @Test
+    void bulkAdd() {
+        long count = queryFactory
+            .update(member)
+            .set(member.age, member.age.add(1))
+            .execute();
+    }
+
+    @Test
+    void bulkDelete() {
+        long count = queryFactory
+            .delete(member)
+            .where(member.age.lt(18))
+            .execute();
+    }
 }
